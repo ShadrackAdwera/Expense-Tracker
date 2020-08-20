@@ -36,7 +36,7 @@ const Login = () => {
         if(resData) {
           localStorage.setItem('userName',JSON.stringify(resData.user.name))
           localStorage.setItem('token',JSON.stringify(resData.user.token))
-          history.push('/welcome')
+          history.push('/')
         }
         auth.login()
         } catch (error) {

@@ -36,7 +36,7 @@ const SignUp = () => {
         if(resData) {
           localStorage.setItem('userName',JSON.stringify(resData.user.name))
           localStorage.setItem('token', JSON.stringify(resData.user.token))
-          history.push('/')
+          history.push('/login')
         }
         } catch (error) {
          console.log(error) 
