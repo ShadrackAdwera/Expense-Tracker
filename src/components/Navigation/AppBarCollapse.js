@@ -41,15 +41,17 @@ const handleLogout = () => {
   return <div className={props.classes.root}>
     <ButtonAppBarCollapse>
       {auth.isLoggedIn &&<MenuItem onClick={()=>history.push('/')}>EXPENSES</MenuItem>}
-      {auth.isLoggedIn && <MenuItem>ADD CATEGORY</MenuItem>}
       {auth.isLoggedIn &&<MenuItem onClick={()=>history.push('/users/expense/new')}>ADD EXPENSE</MenuItem>}
+      {auth.isLoggedIn && <MenuItem onClick={()=>history.push('/categories')}>CATEGORIES</MenuItem>}
+      {auth.isLoggedIn &&<MenuItem onClick={()=>history.push('/users/categories/new')}>ADD CATEGORY</MenuItem>}
       {!auth.isLoggedIn? <MenuItem onClick={()=>history.push('/login')}>LOGIN</MenuItem>: <MenuItem onClick={handleLogout}>LOGOUT</MenuItem>}
       {!auth.isLoggedIn &&<MenuItem onClick={()=>history.push('/sign-up')}>SIGN UP</MenuItem>}
     </ButtonAppBarCollapse>
     <div className={props.classes.buttonBar} id="appbar-collapse">
       {auth.isLoggedIn &&<Button color="inherit" onClick={()=>history.push('/')}>EXPENSES</Button>}
-      {auth.isLoggedIn &&<Button color="inherit">ADD CATEGORY</Button>}
       {auth.isLoggedIn &&<Button color="inherit" onClick={()=>history.push('/users/product/new')}>ADD EXPENSE</Button>}
+      {auth.isLoggedIn &&<Button color="inherit" onClick={()=>history.push('/categories')}>CATEGORIES</Button>}
+      {auth.isLoggedIn &&<Button color="inherit" onClick={()=>history.push('/users/categories/new')}>ADD CATEGORY</Button>}
       {!auth.isLoggedIn?<Button color="inherit" onClick={()=>history.push('/login')}>LOGIN</Button> : <Button color="inherit" onClick={handleLogout}>LOGOUT</Button>}
       {!auth.isLoggedIn &&<Button color="inherit" onClick={()=>history.push('/sign-up')}>SIGN UP</Button>}
     </div>
