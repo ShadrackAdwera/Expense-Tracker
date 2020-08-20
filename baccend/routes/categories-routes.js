@@ -6,7 +6,7 @@ const categoriesController = require('../controllers/category-controllers');
 
 const router = express.Router();
 
-//router.use(checkAuth)
+//router.use(checkAuth) 
 
 router.get('/all', categoriesController.getAllCategories);
 
