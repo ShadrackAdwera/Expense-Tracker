@@ -23,8 +23,12 @@ let DUMMY_USERS = [
   },
 ];
 
-//SIGN UP
+//ALL USERS
+const getAllUsers = (req,res,next) => {
+    res.status(200).json({totalUsers: DUMMY_USERS.length, users: DUMMY_USERS})
+}
 
+//SIGN UP
 const signUp = async (req, res, next) => {
   const error = validationResult(req);
   if (!error.isEmpty()) {
@@ -58,7 +62,7 @@ const signUp = async (req, res, next) => {
     name,
     image,
     email,
-    encryptedPassword,
+    password: encryptedPassword,
     token,
   };
   DUMMY_USERS.unshift(createUser);
@@ -86,7 +90,7 @@ const login = async (req, res, next) => {
   try {
     isPassword = await bcrypt.compare(password, foundEmail.password);
   } catch (error) {
-    return next(new HttpError('Auth Failed', 401));
+    return next(new HttpError('Auth Failed-->', 401));
   }
 
   if (!isPassword) {
@@ -108,3 +112,4 @@ const login = async (req, res, next) => {
 
 exports.signUp = signUp;
 exports.login = login;
+exports.getAllUsers = getAllUsers

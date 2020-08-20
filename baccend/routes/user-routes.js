@@ -3,9 +3,11 @@ const { check } = require('express-validator');
 
 const userControllers = require('../controllers/user-controller');
 
-const app = express();
+const router = express.Router();
 
-app.post(
+router.get('/all', userControllers.getAllUsers)
+
+router.post(
   '/sign-up',
   [
     check('name').not().isEmpty(),
@@ -15,4 +17,6 @@ app.post(
   userControllers.signUp
 );
 
-app.post('login', userControllers.login);
+router.post('/login', userControllers.login);
+
+module.exports = router
