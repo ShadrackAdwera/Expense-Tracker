@@ -12,7 +12,8 @@ let DUMMY_EXPENSES = [
         price: 1000,
         receipt: 'https://i.pinimg.com/originals/75/52/ca/7552ca31d6707a32d67ae0fea789ac44.jpg',
         date: moment(new Date()).format('MMMM Do YYYY, hh:mm'),
-        category: uuid()
+        category: uuid(),
+        user: 1
     },
     {
         id: uuid(),
@@ -21,7 +22,8 @@ let DUMMY_EXPENSES = [
         price: 1200,
         receipt: 'https://i.pinimg.com/originals/75/52/ca/7552ca31d6707a32d67ae0fea789ac44.jpg',
         date: moment(new Date()).format('MMMM Do YYYY, hh:mm'),
-        category: uuid()
+        category: uuid(),
+        user: 2
     },
     {
         id: uuid(),
@@ -30,7 +32,8 @@ let DUMMY_EXPENSES = [
         price: 1500,
         receipt: 'https://i.pinimg.com/originals/75/52/ca/7552ca31d6707a32d67ae0fea789ac44.jpg',
         date: moment(new Date()).format('MMMM Do YYYY, hh:mm'),
-        category: uuid()
+        category: uuid(),
+        user: 1
     }
 ]
 
@@ -52,6 +55,16 @@ const addExpense = (req,res,next) => {
 //READ
 const getAllExpenses = (req,res,next) => {
     res.status(200).json({totalExpenses: DUMMY_EXPENSES.length, expenses: DUMMY_EXPENSES})
+}
+
+const getExpensesByUser = (req,res,next) => {
+    const userId = req.params.id
+    const foundUser = DUMMY_EXPENSES.find(exp=>exp.user===userId)
+    if(!foundUser) {
+        return next(new HttpError('User does not exist',404))
+    }
+    const foundExpenses = DUMMY_EXPENSES.filter(exp=>exp.user===userId)
+    res.status(200).json({totalExpenses: DUMMY_EXPENSES.length, expenses: foundExpenses})
 }
 
 const getExpenseById = (req,res,next) => {
@@ -92,6 +105,7 @@ const deleteExpense = (req,res,next) => {
 
 exports.getAllExpenses = getAllExpenses
 exports.getExpenseById = getExpenseById
+exports.getExpensesByUser = getExpensesByUser
 exports.addExpense = addExpense
 exports.updateExpense = updateExpense
 exports.deleteExpense = deleteExpense

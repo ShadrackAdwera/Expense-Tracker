@@ -7,6 +7,7 @@ const router = express.Router();
 
 router.get('/all', expensesController.getAllExpenses);
 router.get('/:id', expensesController.getExpenseById);
+router.get('/user/:id',expensesController.getExpensesByUser)
 router.post(
   '/new',
   [
