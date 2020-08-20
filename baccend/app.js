@@ -3,6 +3,7 @@ const bodyParser = require('body-parser')
 
 const HttpError = require('./models/http-error')
 const userRoutes = require('./routes/user-routes')
+const categoriesRoutes = require('./routes/categories-routes')
 
 const app = express()
 
@@ -22,6 +23,7 @@ app.use((req, res, next) => {
 app.use(bodyParser.json())
 
 app.use('/api/users', userRoutes)
+app.use('/api/categories', categoriesRoutes)
 
 app.use((req, res, next) => {
     throw new HttpError('Could not find the method / route. Try Again', 500);

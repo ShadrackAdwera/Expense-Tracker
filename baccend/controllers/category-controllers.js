@@ -39,11 +39,11 @@ const createCategory = (req,res,next) => {
     if(!error.isEmpty()) {
         return next(new HttpError('Provide all the required fields',422))
     }
-    const { name, description, expenses } = req.body
+    const { name, description } = req.body
 
     const createdCategory = {
         id: uuid(),
-        name,description, expenses, total: 5000
+        name,description, expenses: [ ], total: 5000
     }
     DUMMY_CATEGORIES.unshift(createdCategory)
     res.status(200).json({message:'Successfully Create Category', category: createdCategory})

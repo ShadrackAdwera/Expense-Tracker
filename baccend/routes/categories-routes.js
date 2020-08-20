@@ -18,7 +18,7 @@ router.post(
   categoriesController.createCategory
 );
 
-router.patch('/:id', categoriesController.getCategoryById)
+router.patch('/:id', categoriesController.updateCategory)
 
 router.delete('/:id',categoriesController.deleteCategory)
 
