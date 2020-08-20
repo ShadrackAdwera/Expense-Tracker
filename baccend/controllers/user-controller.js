@@ -107,7 +107,7 @@ const login = async (req, res, next) => {
 
   res
     .status(200)
-    .json({ message: 'Logged In', user: { id: foundEmail.id, email, token } });
+    .json({ message: 'Logged In', user: { id: foundEmail.id, name: foundEmail.name ,email, token } });
 };
 
 exports.signUp = signUp;
