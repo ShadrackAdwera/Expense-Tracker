@@ -49,7 +49,7 @@ const AddExpense = () => {
   return (
     <Container className="centered">
       <h3>
-        <strong>ADD EXPENSE</strong>
+        <strong>TAG EXPENSE</strong>
       </h3>
       <Grid container spacing={4}>
         <Grid item xs={12} sm={6}>
