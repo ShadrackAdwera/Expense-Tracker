@@ -17,4 +17,6 @@ router.post(
   expensesController.addExpense
 );
 router.patch('/:id', expensesController.updateExpense);
-router.delete(':/id', expensesController.deleteExpense);
+router.delete('/:id', expensesController.deleteExpense);
+
+module.exports = router

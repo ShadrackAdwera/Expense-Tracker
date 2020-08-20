@@ -43,7 +43,7 @@ const addExpense = (req,res,next) => {
     }
     const createdExpense = {
         id: uuid(),
-        name, description, price, receipt
+        name, description, price, receipt, date: moment(new Date()).format('MMMM Do YYYY, hh:mm') ,category: uuid()
     }
     DUMMY_EXPENSES.unshift(createdExpense)
     res.status(201).json({message: 'Expense Added', expense: createdExpense})
