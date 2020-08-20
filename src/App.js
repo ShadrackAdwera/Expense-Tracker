@@ -2,10 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { Route, Switch, Redirect } from 'react-router-dom';
 import LoginPage from './components/auth/login/login';
 import SignUpPage from './components/auth/signup/signup';
-import Welcome from './components/welcome/welcome';
 import { AuthContext } from './shared/auth-context';
 import AppBar from './components/Navigation/index';
+import Welcome from './components/welcome/welcome';
 import AddExpense from './components/welcome/add/AddExpense';
+import Categories from './components/categories/Categories'
+import AddCategories from './components/categories/Add/AddCategory' 
 import './App.css';
 
 //const LoginPage = React.lazy(()=>import('./components/auth/login/login'))
@@ -34,6 +36,8 @@ function App() {
       <Switch>
         <Route exact path="/" component={Welcome} />
         <Route exact path="/expenses/new" component={AddExpense} />
+        <Route exact path="/categories/new" component={AddCategories} />
+        <Route exact path="/categories" component={Categories} />
         <Redirect to = '/' />
       </Switch>
     );

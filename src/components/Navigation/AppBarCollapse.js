@@ -43,7 +43,7 @@ const handleLogout = () => {
       {auth.isLoggedIn &&<MenuItem onClick={()=>history.push('/')}>EXPENSES</MenuItem>}
       {auth.isLoggedIn &&<MenuItem onClick={()=>history.push('/expenses/new')}>ADD EXPENSE</MenuItem>}
       {auth.isLoggedIn && <MenuItem onClick={()=>history.push('/categories')}>CATEGORIES</MenuItem>}
-      {auth.isLoggedIn &&<MenuItem onClick={()=>history.push('/users/categories/new')}>ADD CATEGORY</MenuItem>}
+      {auth.isLoggedIn &&<MenuItem onClick={()=>history.push('/categories/new')}>ADD CATEGORY</MenuItem>}
       {!auth.isLoggedIn? <MenuItem onClick={()=>history.push('/login')}>LOGIN</MenuItem>: <MenuItem onClick={handleLogout}>LOGOUT</MenuItem>}
       {!auth.isLoggedIn &&<MenuItem onClick={()=>history.push('/sign-up')}>SIGN UP</MenuItem>}
     </ButtonAppBarCollapse>
@@ -51,7 +51,7 @@ const handleLogout = () => {
       {auth.isLoggedIn &&<Button color="inherit" onClick={()=>history.push('/')}>EXPENSES</Button>}
       {auth.isLoggedIn &&<Button color="inherit" onClick={()=>history.push('/expenses/new')}>ADD EXPENSE</Button>}
       {auth.isLoggedIn &&<Button color="inherit" onClick={()=>history.push('/categories')}>CATEGORIES</Button>}
-      {auth.isLoggedIn &&<Button color="inherit" onClick={()=>history.push('/users/categories/new')}>ADD CATEGORY</Button>}
+      {auth.isLoggedIn &&<Button color="inherit" onClick={()=>history.push('/categories/new')}>ADD CATEGORY</Button>}
       {!auth.isLoggedIn?<Button color="inherit" onClick={()=>history.push('/login')}>LOGIN</Button> : <Button color="inherit" onClick={handleLogout}>LOGOUT</Button>}
       {!auth.isLoggedIn &&<Button color="inherit" onClick={()=>history.push('/sign-up')}>SIGN UP</Button>}
     </div>

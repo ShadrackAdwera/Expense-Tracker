@@ -1,7 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import MUIDataTable from 'mui-datatables';
 import { useHttp } from '../../shared/http-hook';
-import './welcome.css';
 
 const Categories = () => {
   const columns = ['name', 'description', 'total'];
@@ -25,7 +24,7 @@ const Categories = () => {
   }, [fetchCategories]);
 
   return (
-      <div className="centered">
+      <div className='main-container'>
         <MUIDataTable
           title={'Categories'}
           data={categories}

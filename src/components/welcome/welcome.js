@@ -1,7 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import MUIDataTable from 'mui-datatables';
 import { useHttp } from '../../shared/http-hook';
-import './welcome.css';
 
 const Welcome = () => {
   const columns = ['name', 'description', 'price', 'date', 'category'];
@@ -10,6 +9,10 @@ const Welcome = () => {
   };
 
   const [expenses, setExpenses] = useState([]);
+  const [userName, setUserName] = useState()
+    useEffect(()=>{
+        setUserName(JSON.parse(localStorage.getItem('userName')))
+    },[userName])
   const { sendRequest } = useHttp();
   const fetchExpenses = useCallback(async () => {
     try {
@@ -25,14 +28,16 @@ const Welcome = () => {
   }, [fetchExpenses]);
 
   return (
-      <div className="centered">
+      <React.Fragment>
+    <div className="main-container">
         <MUIDataTable
-          title={'Expenses'}
+          title={`${userName}'s Expenses`}
           data={expenses}
           columns={columns}
           options={options}
         />
-      </div>
+    </div>
+      </React.Fragment>
   );
 };
 
