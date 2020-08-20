@@ -25,8 +25,7 @@ const Welcome = () => {
   }, [fetchExpenses]);
 
   return (
-    <div className="main-container">
-      <div className="child-container">
+      <div className="centered">
         <MUIDataTable
           title={'Expenses'}
           data={expenses}
@@ -34,7 +33,6 @@ const Welcome = () => {
           options={options}
         />
       </div>
-    </div>
   );
 };
 
