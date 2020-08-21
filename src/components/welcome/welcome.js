@@ -15,9 +15,10 @@ const Welcome = () => {
     },[userName])
   const { sendRequest } = useHttp();
   const fetchExpenses = useCallback(async () => {
+    const userId = JSON.parse(localStorage.getItem('userId'))
     try {
       const resData = await sendRequest(
-        'http://localhost:5000/api/expenses/all'
+        `http://localhost:5000/api/expenses/user/${userId}`
       );
       setExpenses(resData.expenses);
     } catch (error) {}

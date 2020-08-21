@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback, useEffect, useReducer } from 'react';
+import { useHistory } from 'react-router-dom'
 import {
   TextField,
   Grid,
@@ -8,8 +9,10 @@ import {
   FormControl,
   MenuItem,
   Button,
+  CircularProgress,
 } from '@material-ui/core';
 import Container from '../../UI/Wrapper/Container';
+import { useHttp } from '../../../shared/http-hook';
 
 const useStyles = makeStyles((theme) => ({
   container: {
@@ -30,22 +33,69 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
+const initialState = {
+  name: '',
+  description: '',
+  price: '',
+  category: '',
+  file: null
+};
+
+const reducer = (state, action) => {
+  switch (action.type) {
+    case 'SET_NAME':
+      return { ...state, name: action.value };
+    case 'SET_DESCRIPTION':
+      return { ...state, description: action.value };
+    case 'SET_PRICE':
+      return { ...state, price: action.value };
+    case 'SET_CATEGORY':
+      return { ...state, category: action.value };
+    case 'SET_FILE':
+      return {...state, file: action.value}
+    default:
+      return state;
+  }
+};
+
 const AddExpense = () => {
   const classes = useStyles();
-  const [age, setAge] = useState('');
-  const [open, setOpen] = useState(false);
+  const [categories, setCategories] = useState([]);
+  const { sendRequest, isLoading } = useHttp();
+  const [formState, dispatch] = useReducer(reducer, initialState);
+  const history = useHistory()
 
-  const handleChange = (event) => {
-    setAge(event.target.value);
-  };
+  const fetchCategories = useCallback(async () => {
+    const resData = await sendRequest(
+      'http://localhost:5000/api/categories/all'
+    );
+    setCategories(
+      resData.categories.map(({ id, name }) => ({ label: name, value: id }))
+    );
+  }, [sendRequest]);
 
-  const handleClose = () => {
-    setOpen(false);
-  };
+  useEffect(() => {
+    fetchCategories();
+  }, [fetchCategories]);
 
-  const handleOpen = () => {
-    setOpen(true);
-  };
+  const tagExpense = async () => {
+    const formData = new FormData()
+    formData.append('name',formState.name)
+    formData.append('description', formState.description)
+    formData.append('price', formState.price)
+    formData.append('category', formState.category)
+    formData.append('receipt', formState.file)
+    formData.append('user', JSON.parse(localStorage.getItem('userId')))
+    try {
+      const resData = await sendRequest('http://localhost:5000/api/expenses/new', 'POST',formData)
+      if(resData.expense) {
+        history.push('/')
+      }
+    } catch (error) {
+      
+    }
+  }
+
   return (
     <Container className="centered">
       <h3>
@@ -53,25 +103,33 @@ const AddExpense = () => {
       </h3>
       <Grid container spacing={4}>
         <Grid item xs={12} sm={6}>
-          <TextField placeholder="Name" fullWidth />
-        </Grid>
-        <Grid item xs={12} sm={6}>
-          <TextField placeholder="Description" fullWidth />
-        </Grid>
-        <Grid item xs={12} sm={6}>
-          <TextField placeholder="Price" fullWidth />
+          <TextField
+            placeholder="Name"
+            fullWidth
+            value={formState.name}
+            onChange={(e) =>
+              dispatch({ type: 'SET_NAME', value: e.target.value })
+            }
+          />
         </Grid>
         <Grid item xs={12} sm={6}>
           <TextField
-            id="date"
-            label="Date"
-            type="date"
-            defaultValue={new Date()}
+            placeholder="Description"
             fullWidth
-            className={classes.textField}
-            InputLabelProps={{
-              shrink: true,
-            }}
+            value={formState.description}
+            onChange={(e) =>
+              dispatch({ type: 'SET_DESCRIPTION', value: e.target.value })
+            }
+          />
+        </Grid>
+        <Grid item xs={12} sm={6}>
+          <TextField
+            placeholder="Price"
+            fullWidth
+            value={formState.price}
+            onChange={(e) =>
+              dispatch({ type: 'SET_PRICE', value: e.target.value })
+            }
           />
         </Grid>
         <Grid item xs={12} sm={6}>
@@ -81,37 +139,35 @@ const AddExpense = () => {
             type="file"
             fullWidth
             InputLabelProps={{ shrink: true }}
+            onChange={e=>dispatch({type: 'SET_FILE', value: e.target.value})}
           />
         </Grid>
         <Grid item xs={12} sm={6}>
-          <FormControl className={classes.formControl}>
-            <InputLabel id="demo-controlled-open-select-label">Age</InputLabel>
-            <Select
-              labelId="demo-controlled-open-select-label"
-              id="demo-controlled-open-select"
-              open={open}
-              fullWidth
-              onClose={handleClose}
-              onOpen={handleOpen}
-              value={age}
-              onChange={handleChange}
-            >
-              <MenuItem value="">
-                <em>None</em>
-              </MenuItem>
-              <MenuItem value={10}>Ten</MenuItem>
-              <MenuItem value={20}>Twenty</MenuItem>
-              <MenuItem value={30}>Thirty</MenuItem>
-            </Select>
-          </FormControl>
+        <FormControl className={classes.formControl}>
+        <InputLabel id="category-lable" required>Categories</InputLabel>
+        <Select disabled = {isLoading}
+          labelId="category-label-id"
+          id="category"
+          value={formState.category}
+          onChange={e=> dispatch({type:'SET_CATEGORY', value: e.target.value})}    
+    >
+      {categories.map(item=>(
+        <MenuItem key={item.value} value={item.value}>{item.label}</MenuItem>
+      ))}
+    </Select>
+      </FormControl>
         </Grid>
       </Grid>
       <br />
       <Grid container spacing={4}>
         <Grid item xs={12} sm={6}>
-          <Button variant="contained" color="primary" fullWidth>
-            SUBMIT
-          </Button>
+          {isLoading ? (
+            <CircularProgress />
+          ) : (
+            <Button variant="contained" color="primary" fullWidth onClick={tagExpense}>
+              SUBMIT
+            </Button>
+          )}
         </Grid>
         <Grid item xs={12} sm={6}>
           <Button

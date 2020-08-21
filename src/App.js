@@ -14,22 +14,26 @@ import './App.css';
 
 function App() {
   const [userToken, setUserToken] = useState();
+  const [userId, setUserId] = useState()
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   let routes;
 
   const loginHandler = () => {
     setIsLoggedIn(true);
     setUserToken(JSON.parse(localStorage.getItem('token')));
+    setUserId(JSON.parse(localStorage.getItem('userId')))
   };
 
   const logoutHandler = () => {
     setIsLoggedIn(false);
     setUserToken(localStorage.removeItem('token'));
+    setUserId(localStorage.removeItem('userId'))
   };
 
   useEffect(() => {
     setUserToken(JSON.parse(localStorage.getItem('token')));
-  }, [userToken]);
+    setUserId(JSON.parse(localStorage.getItem('userId')))
+  }, [userToken, userId]);
 
   if (isLoggedIn && userToken) {
     routes = (
@@ -53,6 +57,7 @@ function App() {
     <AuthContext.Provider
       value={{
         isLoggedIn: isLoggedIn,
+        userId: userId,
         token: userToken,
         login: loginHandler,
         logout: logoutHandler,
