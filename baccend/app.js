@@ -1,5 +1,7 @@
 const express = require('express')
 const bodyParser = require('body-parser')
+const path = require('path')
+const fs = require('fs')
 
 const HttpError = require('./models/http-error')
 const userRoutes = require('./routes/user-routes')
@@ -23,6 +25,8 @@ app.use((req, res, next) => {
 
 app.use(bodyParser.json())
 
+app.use('/uploads/images', express.static(path.join('uploads','images')))
+
 app.use('/api/users', userRoutes)
 app.use('/api/categories', categoriesRoutes)
 app.use('/api/expenses',expensesRoutes)
@@ -33,6 +37,11 @@ app.use((req, res, next) => {
   });
   
   app.use((error, req, res, next) => {
+    if(req.file){
+      fs.unlink(req.file.path, (err)=>{
+        console.log(err)
+      })
+    }
     if (res.headerSent) {
       return next(error);
     }
