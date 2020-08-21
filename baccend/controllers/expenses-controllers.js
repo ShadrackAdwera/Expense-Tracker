@@ -11,7 +11,7 @@ let DUMMY_EXPENSES = [
     description:
       'Bought Nyama, Ngwashe, Ndizi, Unga, Mboga, Nyanya, Kitunguu, Pili Pili',
     price: 1000,
-    receipt:
+    image:
       'https://i.pinimg.com/originals/75/52/ca/7552ca31d6707a32d67ae0fea789ac44.jpg',
     date: moment(new Date()).format('MMMM Do YYYY, hh:mm'),
     category: uuid(),
@@ -22,7 +22,7 @@ let DUMMY_EXPENSES = [
     name: 'Afternoon Expense',
     description: 'Ordered Pizza Off of Jumia',
     price: 1200,
-    receipt:
+    image:
       'https://i.pinimg.com/originals/75/52/ca/7552ca31d6707a32d67ae0fea789ac44.jpg',
     date: moment(new Date()).format('MMMM Do YYYY, hh:mm'),
     category: uuid(),
@@ -33,7 +33,7 @@ let DUMMY_EXPENSES = [
     name: 'Night Expense',
     description: 'Enjoyed Nyama Choma and Drinks with friends',
     price: 1500,
-    receipt:
+    image:
       'https://i.pinimg.com/originals/75/52/ca/7552ca31d6707a32d67ae0fea789ac44.jpg',
     date: moment(new Date()).format('MMMM Do YYYY, hh:mm'),
     category: uuid(),
@@ -43,7 +43,7 @@ let DUMMY_EXPENSES = [
 
 //CREATE
 const addExpense = (req, res, next) => {
-  const { name, description, price } = req.body;
+  const { name, description, price, category, user } = req.body;
   const error = validationResult(req);
   if (!error.isEmpty()) {
     return next(new HttpError('Provide all fields', 422));
@@ -53,9 +53,10 @@ const addExpense = (req, res, next) => {
     name,
     description,
     price,
-    receipt: req.file.path,
+    image: req.file.path,
     date: moment(new Date()).format('MMMM Do YYYY, hh:mm'),
-    category: uuid(),
+    category,
+    user
   };
   DUMMY_EXPENSES.unshift(createdExpense);
   res.status(201).json({ message: 'Expense Added', expense: createdExpense });
@@ -70,14 +71,14 @@ const getAllExpenses = (req, res, next) => {
 
 const getExpensesByUser = (req, res, next) => {
   const userId = req.params.id;
-  const foundUser = DUMMY_EXPENSES.find((exp) => exp.user === userId);
-  if (!foundUser) {
-    return next(new HttpError('User does not exist', 404));
-  }
+//   const foundUser = DUMMY_EXPENSES.find((exp) => exp.user === userId);
+//   if (!foundUser) {
+//     return next(new HttpError('User does not exist', 404));
+//   }
   const foundExpenses = DUMMY_EXPENSES.filter((exp) => exp.user === userId);
   res
     .status(200)
-    .json({ totalExpenses: DUMMY_EXPENSES.length, expenses: foundExpenses });
+    .json({ totalExpenses: foundExpenses.length, expenses: foundExpenses });
 };
 
 const getExpenseById = (req, res, next) => {

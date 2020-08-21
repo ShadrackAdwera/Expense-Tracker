@@ -16,6 +16,7 @@ router.post(
     check('name').not().isEmpty(),
     check('description').not().isEmpty(),
     check('price').isNumeric(),
+    check('category').not().isEmpty()
   ],
   expensesController.addExpense
 );
