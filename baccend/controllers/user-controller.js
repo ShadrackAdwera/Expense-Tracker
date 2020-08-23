@@ -2,32 +2,23 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const { validationResult } = require('express-validator');
 const HttpError = require('../models/http-error');
-const User = require('../models/User')
-
-// let DUMMY_USERS = [
-//   {
-//     id: uuid(),
-//     name: 'Test Subject One',
-//     email: 'testone@mail.com',
-//     password: 'qazwsx',
-//   },
-//   {
-//     id: uuid(),
-//     name: 'Test Subject Two',
-//     password: 'xswzaq',
-//   },
-// ];
+const User = require('../models/User');
 
 //ALL USERS
-const getAllUsers = async (req,res,next) => {
-    let allUsers
-    try {
-      allUsers = await User.find({},'-password').exec()
-    } catch (error) {
-      return next(new HttpError('COuld not fetch users', 500));
-    }
-    res.status(200).json({totalUsers: allUsers.length, users: allUsers.map(user=>user.toObject({getters:true}))})
-}
+const getAllUsers = async (req, res, next) => {
+  let allUsers;
+  try {
+    allUsers = await User.find({}, '-password').exec();
+  } catch (error) {
+    return next(new HttpError('COuld not fetch users', 500));
+  }
+  res
+    .status(200)
+    .json({
+      totalUsers: allUsers.length,
+      users: allUsers.map((user) => user.toObject({ getters: true })),
+    });
+};
 
 //SIGN UP
 const signUp = async (req, res, next) => {
@@ -37,14 +28,13 @@ const signUp = async (req, res, next) => {
   }
   const { name, email, password } = req.body;
 
-  let foundEmail
+  let foundEmail;
 
   try {
-    foundEmail = await User.findOne({email}).exec()
+    foundEmail = await User.findOne({ email }).exec();
   } catch (error) {
     return next(new HttpError('Could not search DB for emails', 500));
   }
-
 
   if (foundEmail) {
     return next(new HttpError('Email exists, try logging in', 422));
@@ -53,7 +43,7 @@ const signUp = async (req, res, next) => {
   let token;
 
   try {
-    encryptedPassword = await bcrypt.hash(password, 12)
+    encryptedPassword = await bcrypt.hash(password, 12);
   } catch (error) {
     return next(new HttpError('Could not hash password', 500));
   }
@@ -65,33 +55,35 @@ const signUp = async (req, res, next) => {
     //expenses: ''
   };
 
-  const signedUpUser = new User(createUser)
+  const signedUpUser = new User(createUser);
   try {
-    await signedUpUser.save()
+    await signedUpUser.save();
   } catch (error) {
     return next(new HttpError('Could not save user', 500));
   }
 
   try {
-    token = jwt.sign({userId: createUser.id, email: createUser.email}, process.env.JWT_KEY,{expiresIn:'1h'})
+    token = jwt.sign(
+      { userId: createUser.id, email: createUser.email },
+      process.env.JWT_KEY,
+      { expiresIn: '1h' }
+    );
   } catch (error) {
     return next(new HttpError('Could not generate tokens', 500));
   }
-  res
-    .status(201)
-    .json({
-      message: 'Sign Up Successful',
-      user: { id: signedUpUser.id ,name, email, token },
-    });
+  res.status(201).json({
+    message: 'Sign Up Successful',
+    user: { id: signedUpUser.id, name, email, token },
+  });
 };
 
 const login = async (req, res, next) => {
   const { email, password } = req.body;
 
-  let foundEmail
+  let foundEmail;
 
   try {
-    foundEmail = await User.findOne({email})
+    foundEmail = await User.findOne({ email });
   } catch (error) {
     return next(new HttpError('Could not search for email', 500));
   }
@@ -104,25 +96,31 @@ const login = async (req, res, next) => {
   let token;
 
   try {
-    isPassword = await bcrypt.compare(password, foundEmail.password)
+    isPassword = await bcrypt.compare(password, foundEmail.password);
   } catch (error) {
     return next(new HttpError('Password compare failed', 401));
   }
 
-  if(!isPassword) {
+  if (!isPassword) {
     return next(new HttpError('Invalid password', 422));
   }
 
   try {
-    token = jwt.sign({userId: foundEmail.id, email: foundEmail.email}, process.env.JWT_KEY, {expiresIn: '1h'})
-  } catch (error) { 
-  }
+    token = jwt.sign(
+      { userId: foundEmail.id, email: foundEmail.email },
+      process.env.JWT_KEY,
+      { expiresIn: '1h' }
+    );
+  } catch (error) {}
 
   res
     .status(200)
-    .json({ message: 'Logged In', user: { id: foundEmail.id, name: foundEmail.name ,email, token } });
+    .json({
+      message: 'Logged In',
+      user: { id: foundEmail.id, name: foundEmail.name, email, token },
+    });
 };
 
 exports.signUp = signUp;
 exports.login = login;
-exports.getAllUsers = getAllUsers
+exports.getAllUsers = getAllUsers;
