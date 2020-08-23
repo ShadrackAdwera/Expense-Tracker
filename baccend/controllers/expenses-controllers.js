@@ -96,15 +96,9 @@ const getExpensesByUser = async (req, res, next) => {
   } catch (error) {
     return next(new HttpError('Could not fetch user',500))
   }
-  if(userExpenses.length<1) {
+  if(!userExpenses ||userExpenses.length<1) {
     return next(new HttpError('Could not find expenses for the provided user',404))
   }
-
-  // let foundExpenses
-  // try {
-  //   foundExpenses = Expense.find({})
-  // } catch (error) {  
-  // }
   res
     .status(200)
     .json({ totalExpenses: userExpenses.length, expenses: userExpenses.map(exp=>exp.toObject({getters:true})) });
@@ -127,15 +121,18 @@ const getExpenseById = async (req, res, next) => {
 };
 
 //UPDATE
-const updateExpense = (req, res, next) => {
+const updateExpense = async (req, res, next) => {
   const expenseId = req.params.id;
-  const { name, description, price, date } = req.body;
-  const foundExpense = DUMMY_EXPENSES.find(
-    (expense) => expense.id === expenseId
-  );
-  const expenseIndex = DUMMY_EXPENSES.findIndex(
-    (expense) => expense.id === expenseId
-  );
+  const { name, description, price, date, category } = req.body;
+  
+  let foundExpense
+
+  try {
+    foundExpense = await Expense.findById(expenseId)
+  } catch (error) {
+    return next(new HttpError('Could not fetch expense', 500));
+  }
+
   if (!foundExpense) {
     return next(new HttpError('Expense does not exist', 404));
   }
@@ -143,19 +140,34 @@ const updateExpense = (req, res, next) => {
   foundExpense.description = description;
   foundExpense.price = price;
   foundExpense.date = date;
-  DUMMY_EXPENSES[expenseIndex] = foundExpense;
-  res.status(200).json({ message: 'Updated!', expense: foundExpense });
+  foundExpense.category = category;
+
+  try {
+    await foundExpense.save()
+  } catch (error) {
+    return next(new HttpError('Could not save expense', 500));
+  }
+
+  res.status(200).json({ message: 'Updated!', expense: foundExpense.toObject({getters:true}) });
 };
 
-const deleteExpense = (req, res, next) => {
+const deleteExpense = async (req, res, next) => {
   const expenseId = req.params.id;
-  const foundExpense = DUMMY_EXPENSES.find(
-    (expense) => expense.id === expenseId
-  );
+  let foundExpense
+
+  try {
+    foundExpense = await Expense.findById(expenseId)
+  } catch (error) {
+    return next(new HttpError('Could not fetch expense', 500));
+  }
   if (!foundExpense) {
     return next(new HttpError('Expense does not exist', 404));
   }
-  DUMMY_EXPENSES = DUMMY_EXPENSES.filter((expense) => expense.id !== expenseId);
+  try {
+    await Expense.remove(foundExpense)
+  } catch (error) {
+    return next(new HttpError('Could not delete expense', 500));
+  }
   res.status(200).json({ message: 'Deleted!' });
 };
 
