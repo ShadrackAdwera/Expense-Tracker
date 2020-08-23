@@ -1,26 +1,32 @@
-const { v4: uuid } = require('uuid');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const { validationResult } = require('express-validator');
 const HttpError = require('../models/http-error');
+const User = require('../models/User')
 
-let DUMMY_USERS = [
-  {
-    id: uuid(),
-    name: 'Test Subject One',
-    email: 'testone@mail.com',
-    password: 'qazwsx',
-  },
-  {
-    id: uuid(),
-    name: 'Test Subject Two',
-    password: 'xswzaq',
-  },
-];
+// let DUMMY_USERS = [
+//   {
+//     id: uuid(),
+//     name: 'Test Subject One',
+//     email: 'testone@mail.com',
+//     password: 'qazwsx',
+//   },
+//   {
+//     id: uuid(),
+//     name: 'Test Subject Two',
+//     password: 'xswzaq',
+//   },
+// ];
 
 //ALL USERS
-const getAllUsers = (req,res,next) => {
-    res.status(200).json({totalUsers: DUMMY_USERS.length, users: DUMMY_USERS})
+const getAllUsers = async (req,res,next) => {
+    let allUsers
+    try {
+      allUsers = await User.find({},'-password').exec()
+    } catch (error) {
+      return next(new HttpError('COuld not fetch users', 500));
+    }
+    res.status(200).json({totalUsers: allUsers.length, users: allUsers.map(user=>user.toObject({getters:true}))})
 }
 
 //SIGN UP
@@ -30,7 +36,15 @@ const signUp = async (req, res, next) => {
     return next(new HttpError('Sign Up failed, check your inputs', 422));
   }
   const { name, email, password } = req.body;
-  const foundEmail = DUMMY_USERS.find((user) => user.email === email);
+
+  let foundEmail
+
+  try {
+    foundEmail = await User.findOne({email}).exec()
+  } catch (error) {
+    return next(new HttpError('Could not search DB for emails', 500));
+  }
+
 
   if (foundEmail) {
     return next(new HttpError('Email exists, try logging in', 422));
@@ -39,64 +53,69 @@ const signUp = async (req, res, next) => {
   let token;
 
   try {
-    encryptedPassword = await bcrypt.hash(password, 12);
+    encryptedPassword = await bcrypt.hash(password, 12)
   } catch (error) {
-    return next(new HttpError('Auth failed', 401));
-  }
-
-  try {
-    token = jwt.sign({ email, password }, 'fucc_them_kids', {
-      expiresIn: '1h',
-    });
-  } catch (error) {
-    return next(new HttpError('Auth failed', 401));
+    return next(new HttpError('Could not hash password', 500));
   }
 
   const createUser = {
-    id: uuid(),
     name,
     email,
     password: encryptedPassword,
-    token,
+    //expenses: ''
   };
-  DUMMY_USERS.unshift(createUser);
 
+  const signedUpUser = new User(createUser)
+  try {
+    await signedUpUser.save()
+  } catch (error) {
+    return next(new HttpError('Could not save user', 500));
+  }
+
+  try {
+    token = jwt.sign({userId: createUser.id, email: createUser.email}, process.env.JWT_KEY,{expiresIn:'1h'})
+  } catch (error) {
+    return next(new HttpError('Could not generate tokens', 500));
+  }
   res
     .status(201)
     .json({
       message: 'Sign Up Successful',
-      user: { name, email, token },
+      user: { id: signedUpUser.id ,name, email, token },
     });
 };
 
 const login = async (req, res, next) => {
   const { email, password } = req.body;
 
-  const foundEmail = DUMMY_USERS.find((user) => user.email === email);
+  let foundEmail
+
+  try {
+    foundEmail = await User.findOne({email})
+  } catch (error) {
+    return next(new HttpError('Could not search for email', 500));
+  }
 
   if (!foundEmail) {
-    return next(new HttpError('Email does not exist', 401));
+    return next(new HttpError('Email does not exist', 422));
   }
 
   let isPassword;
   let token;
 
   try {
-    isPassword = await bcrypt.compare(password, foundEmail.password);
+    isPassword = await bcrypt.compare(password, foundEmail.password)
   } catch (error) {
-    return next(new HttpError('Auth Failed-->', 401));
+    return next(new HttpError('Password compare failed', 401));
   }
 
-  if (!isPassword) {
-    return next(new HttpError('Invalid password', 401));
+  if(!isPassword) {
+    return next(new HttpError('Invalid password', 422));
   }
 
   try {
-    token = jwt.sign({ email, password }, 'fucc_them_kids', {
-      expiresIn: '1h',
-    });
-  } catch (error) {
-    return next(new HttpError('Could not generate token', 500));
+    token = jwt.sign({userId: foundEmail.id, email: foundEmail.email}, process.env.JWT_KEY, {expiresIn: '1h'})
+  } catch (error) { 
   }
 
   res

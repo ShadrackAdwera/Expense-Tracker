@@ -7,7 +7,7 @@ const expenseSchema = new mongoose.Schema({
  image: { type: String, required: true },
  price: { type: Number, required: true },
  category: { type: String, required: true },
- user: { type: String, required: true },
+ user: [{type: mongoose.Types.ObjectId, required: true, ref:'User'}],
  dateCreated: { type: String }
 })
 
