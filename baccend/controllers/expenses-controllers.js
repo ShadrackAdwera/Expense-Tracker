@@ -87,16 +87,29 @@ const getAllExpenses = async (req, res, next) => {
     .json({ totalExpenses: allExpenses.length, expenses: allExpenses.map(expe=>expe.toObject({getters:true})) });
 };
 
-const getExpensesByUser = (req, res, next) => {
+const getExpensesByUser = async (req, res, next) => {
   const userId = req.params.id;
-  //   const foundUser = DUMMY_EXPENSES.find((exp) => exp.user === userId);
-  //   if (!foundUser) {
-  //     return next(new HttpError('User does not exist', 404));
-  //   }
-  const foundExpenses = DUMMY_EXPENSES.filter((exp) => exp.user === userId);
+  let userExpenses
+
+  try {
+    userExpenses = await Expense.find({user: userId}).exec()
+  } catch (error) {
+    return next(new HttpError('Could not fetch user',500))
+  }
+  if(userExpenses.length<1) {
+    return next(new HttpError('Could not find expenses for the provided user',404))
+  }
+
+  // let foundExpenses
+  // try {
+  //   foundExpenses = Expense.find({})
+  // } catch (error) {  
+  // }
   res
     .status(200)
-    .json({ totalExpenses: foundExpenses.length, expenses: foundExpenses });
+    .json({ totalExpenses: userExpenses.length, expenses: userExpenses.map(exp=>exp.toObject({getters:true})) });
+
+
 };
 
 const getExpenseById = async (req, res, next) => {
