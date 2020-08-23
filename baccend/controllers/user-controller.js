@@ -52,7 +52,7 @@ const signUp = async (req, res, next) => {
     name,
     email,
     password: encryptedPassword,
-    //expenses: ''
+    expenses: []
   };
 
   const signedUpUser = new User(createUser);

@@ -7,10 +7,8 @@ const expenseSchema = new mongoose.Schema({
  image: { type: String, required: true },
  price: { type: Number, required: true },
  category: { type: String, required: true },
- user: [{type: mongoose.Types.ObjectId, required: true, ref:'User'}],
+ user: {type: mongoose.Types.ObjectId, required: true, ref:'User'},
  dateCreated: { type: String }
 })
 
 module.exports = mongoose.model('Expense', expenseSchema)
-
-//const { name, description, date ,price, category, user } = req.body;
