@@ -1,11 +1,11 @@
 const { validationResult } = require('express-validator');
 const mongoose = require('mongoose');
 const moment = require('moment');
-const Expense = require('../models/Expense');
 
+const Expense = require('../models/Expense');
 const HttpError = require('../models/http-error');
 const User = require('../models/User');
-
+const Category = require('../models/Category');
 // let DUMMY_EXPENSES = [
 //   {
 //     id: uuid(),
@@ -51,6 +51,7 @@ const addExpense = async (req, res, next) => {
     return next(new HttpError('Provide all fields', 422));
   }
   let foundUser;
+  let foundCategory;
 
   try {
     foundUser = await User.findById(user);
@@ -59,7 +60,17 @@ const addExpense = async (req, res, next) => {
   }
 
   if (!foundUser) {
-    return next(new HttpError('User does not exist', 422));
+    return next(new HttpError('User does not exist', 404));
+  }
+
+  try {
+    foundCategory = await Category.findById(category);
+  } catch (error) {
+    return next(new HttpError('Could not search for categories', 500));
+  }
+
+  if (!foundCategory) {
+    return next(new HttpError('Category does not exist', 404));
   }
 
   const expe = {
@@ -79,7 +90,9 @@ const addExpense = async (req, res, next) => {
     sessn.startTransaction();
     await createdExpense.save({ session: sessn });
     foundUser.expenses.push(createdExpense);
+    foundCategory.expenses.push(createdExpense);
     await foundUser.save({ session: sessn });
+    await foundCategory.save({ session: sessn });
     await sessn.commitTransaction();
   } catch (error) {
     return next(new HttpError('Could not add expense', 500));
@@ -177,7 +190,9 @@ const deleteExpense = async (req, res, next) => {
   let foundExpense;
 
   try {
-    foundExpense = await Expense.findById(expenseId).populate('user');
+    foundExpense = await Expense.findById(expenseId)
+      .populate('user')
+      .populate('category');
   } catch (error) {
     return next(new HttpError('Could not fetch expense', 500));
   }
@@ -185,12 +200,14 @@ const deleteExpense = async (req, res, next) => {
     return next(new HttpError('Expense does not exist', 404));
   }
   try {
-    const sessn = await mongoose.startSession()
-    sessn.startTransaction()
+    const sessn = await mongoose.startSession();
+    sessn.startTransaction();
     await Expense.remove(foundExpense);
-    foundExpense.user.expenses.pull(foundExpense)
-    await foundExpense.user.save({session: sessn})
-    await sessn.commitTransaction()
+    foundExpense.user.expenses.pull(foundExpense);
+    foundExpense.category.expenses.pull(foundExpense);
+    await foundExpense.user.save({ session: sessn });
+    await foundExpense.category.save({ session: sessn });
+    await sessn.commitTransaction();
   } catch (error) {
     return next(new HttpError('Could not delete expense', 500));
   }
