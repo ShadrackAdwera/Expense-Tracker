@@ -73,7 +73,7 @@ const signUp = async (req, res, next) => {
   }
   res.status(201).json({
     message: 'Sign Up Successful',
-    user: { id: signedUpUser.id, name, email, token },
+    user: { id: signedUpUser.id, name, email, token, expenses:[] },
   });
 };
 
@@ -117,7 +117,7 @@ const login = async (req, res, next) => {
     .status(200)
     .json({
       message: 'Logged In',
-      user: { id: foundEmail.id, name: foundEmail.name, email, token },
+      user: { id: foundEmail.id, name: foundEmail.name, email, token, expenses: foundEmail.expenses },
     });
 };
 

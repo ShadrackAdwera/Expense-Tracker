@@ -1,10 +1,10 @@
 const { validationResult } = require('express-validator');
-const mongoose = require('mongoose')
+const mongoose = require('mongoose');
 const moment = require('moment');
 const Expense = require('../models/Expense');
 
 const HttpError = require('../models/http-error');
-const User = require('../models/User')
+const User = require('../models/User');
 
 // let DUMMY_EXPENSES = [
 //   {
@@ -50,15 +50,15 @@ const addExpense = async (req, res, next) => {
   if (!error.isEmpty()) {
     return next(new HttpError('Provide all fields', 422));
   }
-  let foundUser
+  let foundUser;
 
   try {
-    foundUser = await User.findOne({user})
+    foundUser = await User.findById(user);
   } catch (error) {
     return next(new HttpError('Could not search for users', 500));
   }
 
-  if(!foundUser) {
+  if (!foundUser) {
     return next(new HttpError('User does not exist', 422));
   }
 
@@ -75,12 +75,12 @@ const addExpense = async (req, res, next) => {
   };
   const createdExpense = new Expense(expe);
   try {
-    const sessn = await mongoose.startSession()
-    sessn.startTransaction()
+    const sessn = await mongoose.startSession();
+    sessn.startTransaction();
     await createdExpense.save({ session: sessn });
-    foundUser.expenses.push(createdExpense)
-    await foundUser.save({session: sessn})
-    await sessn.commitTransaction()
+    foundUser.expenses.push(createdExpense);
+    await foundUser.save({ session: sessn });
+    await sessn.commitTransaction();
   } catch (error) {
     return next(new HttpError('Could not add expense', 500));
   }
@@ -98,12 +98,10 @@ const getAllExpenses = async (req, res, next) => {
   } catch (error) {
     return next(new HttpError('Could not fetch expenses', 500));
   }
-  res
-    .status(200)
-    .json({
-      totalExpenses: allExpenses.length,
-      expenses: allExpenses.map((expe) => expe.toObject({ getters: true })),
-    });
+  res.status(200).json({
+    totalExpenses: allExpenses.length,
+    expenses: allExpenses.map((expe) => expe.toObject({ getters: true })),
+  });
 };
 
 const getExpensesByUser = async (req, res, next) => {
@@ -120,12 +118,10 @@ const getExpensesByUser = async (req, res, next) => {
       new HttpError('Could not find expenses for the provided user', 404)
     );
   }
-  res
-    .status(200)
-    .json({
-      totalExpenses: userExpenses.length,
-      expenses: userExpenses.map((exp) => exp.toObject({ getters: true })),
-    });
+  res.status(200).json({
+    totalExpenses: userExpenses.length,
+    expenses: userExpenses.map((exp) => exp.toObject({ getters: true })),
+  });
 };
 
 const getExpenseById = async (req, res, next) => {
@@ -170,12 +166,10 @@ const updateExpense = async (req, res, next) => {
     return next(new HttpError('Could not save expense', 500));
   }
 
-  res
-    .status(200)
-    .json({
-      message: 'Updated!',
-      expense: foundExpense.toObject({ getters: true }),
-    });
+  res.status(200).json({
+    message: 'Updated!',
+    expense: foundExpense.toObject({ getters: true }),
+  });
 };
 
 const deleteExpense = async (req, res, next) => {
