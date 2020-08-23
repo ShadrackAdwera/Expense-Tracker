@@ -177,7 +177,7 @@ const deleteExpense = async (req, res, next) => {
   let foundExpense;
 
   try {
-    foundExpense = await Expense.findById(expenseId);
+    foundExpense = await Expense.findById(expenseId).populate('user');
   } catch (error) {
     return next(new HttpError('Could not fetch expense', 500));
   }
@@ -185,7 +185,12 @@ const deleteExpense = async (req, res, next) => {
     return next(new HttpError('Expense does not exist', 404));
   }
   try {
+    const sessn = await mongoose.startSession()
+    sessn.startTransaction()
     await Expense.remove(foundExpense);
+    foundExpense.user.expenses.pull(foundExpense)
+    await foundExpense.user.save({session: sessn})
+    await sessn.commitTransaction()
   } catch (error) {
     return next(new HttpError('Could not delete expense', 500));
   }
