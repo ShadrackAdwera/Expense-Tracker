@@ -1,6 +1,7 @@
 const { v4: uuid } = require('uuid');
 const { validationResult } = require('express-validator');
 const moment = require('moment');
+const Expense = require('../models/Expense');
 
 const HttpError = require('../models/http-error');
 
@@ -42,54 +43,74 @@ let DUMMY_EXPENSES = [
 ];
 
 //CREATE
-const addExpense = (req, res, next) => {
-  const { name, description, price, category, user } = req.body;
+const addExpense = async (req, res, next) => {
+  const { name, description, date, price, category, user } = req.body;
   const error = validationResult(req);
   if (!error.isEmpty()) {
     return next(new HttpError('Provide all fields', 422));
   }
-  const createdExpense = {
-    id: uuid(),
+  const expe = {
     name,
     description,
+    date,
+    image:
+      'https://i.pinimg.com/originals/75/52/ca/7552ca31d6707a32d67ae0fea789ac44.jpg',
     price,
-    image: req.file.path,
-    date: moment(new Date()).format('MMMM Do YYYY, hh:mm'),
     category,
-    user
+    user,
+    dateCreated: moment(new Date()).format('MMMM Do YYYY, hh:mm'),
   };
-  DUMMY_EXPENSES.unshift(createdExpense);
-  res.status(201).json({ message: 'Expense Added', expense: createdExpense });
+  const createdExpense = new Expense(expe);
+  try {
+    await createdExpense.save();
+  } catch (error) {
+    return next(new HttpError('Could not add expense', 500));
+  }
+  res
+    .status(201)
+    .json({
+      message: 'Expense Added',
+      expense: createdExpense.toObject({ getters: true }),
+    });
 };
 
 //READ
-const getAllExpenses = (req, res, next) => {
+const getAllExpenses = async (req, res, next) => {
+  let allExpenses
+  try {
+    allExpenses = await Expense.find().exec();
+  } catch (error) {
+    return next(new HttpError('Could not fetch expenses',500))
+  }
   res
     .status(200)
-    .json({ totalExpenses: DUMMY_EXPENSES.length, expenses: DUMMY_EXPENSES });
+    .json({ totalExpenses: allExpenses.length, expenses: allExpenses.map(expe=>expe.toObject({getters:true})) });
 };
 
 const getExpensesByUser = (req, res, next) => {
   const userId = req.params.id;
-//   const foundUser = DUMMY_EXPENSES.find((exp) => exp.user === userId);
-//   if (!foundUser) {
-//     return next(new HttpError('User does not exist', 404));
-//   }
+  //   const foundUser = DUMMY_EXPENSES.find((exp) => exp.user === userId);
+  //   if (!foundUser) {
+  //     return next(new HttpError('User does not exist', 404));
+  //   }
   const foundExpenses = DUMMY_EXPENSES.filter((exp) => exp.user === userId);
   res
     .status(200)
     .json({ totalExpenses: foundExpenses.length, expenses: foundExpenses });
 };
 
-const getExpenseById = (req, res, next) => {
+const getExpenseById = async (req, res, next) => {
   const expenseId = req.params.id;
-  const foundExpense = DUMMY_EXPENSES.find(
-    (expense) => expense.id === expenseId
-  );
-  if (!foundExpense) {
-    return next(new HttpError('Expense does not exist', 404));
+  let foundExpense
+  try {
+    foundExpense = await Expense.findById(expenseId).exec()
+  } catch (error) {
+    return next(new HttpError('Could not fetch expense', 500))
   }
-  res.status(200).json({ expense: foundExpense });
+  if(!foundExpense) {
+    return next(new HttpError('Expense does not exist', 404))
+  }
+  res.status(200).json({ expense: foundExpense.toObject({getters:true}) });
 };
 
 //UPDATE
