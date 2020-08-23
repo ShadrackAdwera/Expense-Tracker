@@ -68,13 +68,18 @@ const getAllCategories = async (req,res,next) => {
     res.status(200).json({totalCategories: allCategories.length, categories: allCategories.map(category=>category.toObject({getters:true}))})
 }
 
-const getCategoryById = (req,res,next) => {
+const getCategoryById = async (req,res,next) => {
     const categoryId = req.params.id
-    const foundCategory = DUMMY_CATEGORIES.find(category=>category.id===categoryId)
+    let foundCategory
+    try {
+     foundCategory = Category.findById(categoryId)   
+    } catch (error) {
+        return next(new HttpError('Could not find category',500))
+    }
     if(!foundCategory) {
         return next(new HttpError('Category does not exist', 404))
     }
-    res.status(200).json({category: foundCategory})
+    res.status(200).json({category: (await foundCategory).toObject({getters:true})})
 }
 
 //UPDATE
