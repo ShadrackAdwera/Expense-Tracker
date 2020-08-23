@@ -1,6 +1,7 @@
 const { validationResult } = require('express-validator')
 const { v4:uuid } = require('uuid')
 const HttpError = require('../models/http-error')
+const Category = require('../models/Category')
 
 let DUMMY_CATEGORIES = [
     {
@@ -34,24 +35,37 @@ let DUMMY_CATEGORIES = [
 ]
 
 //CREATE
-const createCategory = (req,res,next) => {
+const createCategory = async (req,res,next) => {
     const error = validationResult(req)
     if(!error.isEmpty()) {
         return next(new HttpError('Provide all the required fields',422))
     }
     const { name, description } = req.body
-
-    const createdCategory = {
-        id: uuid(),
-        name,description, expenses: [ ], total: 5000
+    const newCategory = {
+        name, description, expenses: []
     }
-    DUMMY_CATEGORIES.unshift(createdCategory)
-    res.status(200).json({message:'Successfully Create Category', category: createdCategory})
+    const cat = new Category(newCategory)
+    try {
+        await cat.save()
+    } catch (error) {
+        return next(new HttpError('Could not create category',500))
+    }
+    res.status(201).json({message: 'Created', category: cat.toObject({getters:true})})
+
 }
 
 //READ
-const getAllCategories = (req,res,next) => {
-    res.status(200).json({totalCategories: DUMMY_CATEGORIES.length, categories: DUMMY_CATEGORIES})
+const getAllCategories = async (req,res,next) => {
+
+    let allCategories
+
+    try {
+        allCategories = await Category.find()
+    } catch (error) {
+        return next(new HttpError('Could not fetch categories',500))
+    }
+
+    res.status(200).json({totalCategories: allCategories.length, categories: allCategories.map(category=>category.toObject({getters:true}))})
 }
 
 const getCategoryById = (req,res,next) => {
