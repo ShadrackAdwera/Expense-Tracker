@@ -2,6 +2,7 @@ const express = require('express')
 const bodyParser = require('body-parser')
 const path = require('path')
 const fs = require('fs')
+const mongoose = require('mongoose')
 
 const HttpError = require('./models/http-error')
 const userRoutes = require('./routes/user-routes')
@@ -50,4 +51,9 @@ app.use((req, res, next) => {
       .json({ error: error.message || 'An error occured, try again' });
   });
 
-  app.listen(5000)
+  mongoose.connect(`mongodb+srv://adwera:${process.env.DB_PASSWORD}@mongo-rest-api.0iss4.mongodb.net/${process.env.DB_NAME}?retryWrites=true&w=majority`).then(()=>{
+    console.log('Connected to database')
+    app.listen(5000)
+  }).catch(()=>{
+    console.log('Error connecting...')
+  })

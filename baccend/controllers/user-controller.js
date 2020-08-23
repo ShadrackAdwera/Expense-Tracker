@@ -8,17 +8,12 @@ let DUMMY_USERS = [
   {
     id: uuid(),
     name: 'Test Subject One',
-    image:
-      'https://images.unsplash.com/photo-1597721813494-9f6b0cd697f9?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=634&q=80',
     email: 'testone@mail.com',
     password: 'qazwsx',
   },
   {
     id: uuid(),
     name: 'Test Subject Two',
-    image:
-      'https://images.unsplash.com/photo-1597740800878-b1c97d500a39?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=634&q=80',
-    email: 'testtwo@mail.com',
     password: 'xswzaq',
   },
 ];
@@ -34,7 +29,7 @@ const signUp = async (req, res, next) => {
   if (!error.isEmpty()) {
     return next(new HttpError('Sign Up failed, check your inputs', 422));
   }
-  const { name, image, email, password } = req.body;
+  const { name, email, password } = req.body;
   const foundEmail = DUMMY_USERS.find((user) => user.email === email);
 
   if (foundEmail) {
@@ -60,7 +55,6 @@ const signUp = async (req, res, next) => {
   const createUser = {
     id: uuid(),
     name,
-    image,
     email,
     password: encryptedPassword,
     token,
@@ -71,7 +65,7 @@ const signUp = async (req, res, next) => {
     .status(201)
     .json({
       message: 'Sign Up Successful',
-      user: { name, image, email, token },
+      user: { name, email, token },
     });
 };
 
