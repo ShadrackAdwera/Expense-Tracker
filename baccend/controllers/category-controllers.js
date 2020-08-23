@@ -83,19 +83,27 @@ const getCategoryById = async (req,res,next) => {
 }
 
 //UPDATE
-const updateCategory = (req,res,next) => {
+const updateCategory = async (req,res,next) => {
     const categoryId = req.params.id
     const { name, description } = req.body
-    const foundCategory = DUMMY_CATEGORIES.find(category=>category.id===categoryId)
-    const foundIndex = DUMMY_CATEGORIES.findIndex(category=>category.id===categoryId)
+    let foundCategory
+    try {
+        foundCategory = await Category.findById(categoryId)
+    } catch (error) {
+        return next(new HttpError('Could not find category',500))
+    }
     if(!foundCategory) {
         return next(new HttpError('Category does not exist', 404))
     }
     foundCategory.name = name
     foundCategory.description = description
-    DUMMY_CATEGORIES[foundIndex] = foundCategory
+    try {
+        await foundCategory.save()
+    } catch (error) {
+        return next(new HttpError('Update failed!',500))
+    }
     
-    res.status(200).json({message: 'Category Updated', category: foundCategory})
+    res.status(200).json({message: 'Category Updated', category: foundCategory.toObject({getters:true})})
 }
 
 //DELETE
