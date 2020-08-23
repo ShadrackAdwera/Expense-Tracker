@@ -1,8 +1,10 @@
 const { validationResult } = require('express-validator');
+const mongoose = require('mongoose')
 const moment = require('moment');
 const Expense = require('../models/Expense');
 
 const HttpError = require('../models/http-error');
+const User = require('../models/User')
 
 // let DUMMY_EXPENSES = [
 //   {
@@ -48,6 +50,18 @@ const addExpense = async (req, res, next) => {
   if (!error.isEmpty()) {
     return next(new HttpError('Provide all fields', 422));
   }
+  let foundUser
+
+  try {
+    foundUser = await User.findOne({user})
+  } catch (error) {
+    return next(new HttpError('Could not search for users', 500));
+  }
+
+  if(!foundUser) {
+    return next(new HttpError('User does not exist', 422));
+  }
+
   const expe = {
     name,
     description,
@@ -61,7 +75,12 @@ const addExpense = async (req, res, next) => {
   };
   const createdExpense = new Expense(expe);
   try {
-    await createdExpense.save();
+    const sessn = await mongoose.startSession()
+    sessn.startTransaction()
+    await createdExpense.save({ session: sessn });
+    foundUser.expenses.push(createdExpense)
+    await foundUser.save({session: sessn})
+    await sessn.commitTransaction()
   } catch (error) {
     return next(new HttpError('Could not add expense', 500));
   }
