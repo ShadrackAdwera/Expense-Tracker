@@ -128,7 +128,7 @@ const updateCategory = async (req, res, next) => {
     return next(new HttpError('Category does not exist', 404));
   }
 
-  if(foundCategory.user !== req.userData.userId) {
+  if(foundCategory.user.toString() !== req.userData.userId) {
     return next(new HttpError('You are not authorized to perform this operation', 401));
   }
 
@@ -159,7 +159,7 @@ const deleteCategory = async (req, res, next) => {
     return next(new HttpError('Category does not exist', 404));
   }
 
-  if(foundCategory.user !== req.userData.userId) {
+  if(foundCategory.user.toString() !== req.userData.userId) {
     return next(new HttpError('You are not authorized to perform this operation', 401));
   }
 
