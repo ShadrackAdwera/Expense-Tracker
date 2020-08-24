@@ -167,6 +167,11 @@ const updateExpense = async (req, res, next) => {
   if (!foundExpense) {
     return next(new HttpError('Expense does not exist', 404));
   }
+
+  if(foundExpense.user !== req.userData.userId) {
+    return next(new HttpError('You are not authorized to perform this operation', 401));
+  }
+
   foundExpense.name = name;
   foundExpense.description = description;
   foundExpense.price = price;
@@ -199,6 +204,11 @@ const deleteExpense = async (req, res, next) => {
   if (!foundExpense) {
     return next(new HttpError('Expense does not exist', 404));
   }
+
+  if(foundExpense.user !== req.userData.userId) {
+    return next(new HttpError('You are not authorized to perform this operation', 401));
+  }
+
   try {
     const sessn = await mongoose.startSession();
     sessn.startTransaction();
