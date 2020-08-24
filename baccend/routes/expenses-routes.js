@@ -7,11 +7,12 @@ const checkAuth = require('../middlewares/auth-middleware')
 
 const router = express.Router();
 
-router.use(checkAuth)
-
 router.get('/all', expensesController.getAllExpenses);
 router.get('/:id', expensesController.getExpenseById);
 router.get('/user/:id',expensesController.getExpensesByUser)
+
+router.use(checkAuth)
+
 router.post(
   '/new',
   imageUpload.single('image'),

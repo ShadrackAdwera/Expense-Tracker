@@ -6,11 +6,11 @@ const categoriesController = require('../controllers/category-controllers');
 
 const router = express.Router();
 
-router.use(checkAuth) 
-
 router.get('/all', categoriesController.getAllCategories);
 
 router.get('/:id', categoriesController.getCategoryById);
+
+router.use(checkAuth) 
 
 router.post(
   '/new',
