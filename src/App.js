@@ -21,7 +21,8 @@ function App() {
 
   const loginHandler = useCallback(() => {
     setIsLoggedIn(true);
-
+    setUserId(JSON.parse(localStorage.getItem('userId')))
+    setUserToken(JSON.parse(localStorage.getItem('token')));
   },[]);
 
   const logoutHandler = useCallback(() => {
