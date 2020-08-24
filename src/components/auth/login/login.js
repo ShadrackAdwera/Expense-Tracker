@@ -50,10 +50,6 @@ const Login = () => {
     }
   };
 
-  // useEffect(()=>{
-  //     signIn(email, password)
-  // })
-
   return (
     <div className="centered">
       <form

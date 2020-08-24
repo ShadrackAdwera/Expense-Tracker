@@ -36,7 +36,7 @@ function ButtonAppBar(props) {
           color="inherit"
           className={classes.appTitle}
         >
-          {userName}
+          Manage Expenses
         </Typography>
         <AppBarCollapse />
       </Toolbar>

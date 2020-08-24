@@ -1,8 +1,9 @@
-import React, { useReducer } from 'react';
-import { useHistory } from 'react-router-dom'
+import React, { useReducer, useContext } from 'react';
+import { useHistory } from 'react-router-dom';
 import { TextField, Button, Grid, CircularProgress } from '@material-ui/core';
 import Container from '../../UI/Wrapper/Container';
-import { useHttp } from '../../../shared/http-hook'
+import { useHttp } from '../../../shared/http-hook';
+import { AuthContext } from '../../../shared/auth-context';
 
 const initialState = {
   name: '',
@@ -22,22 +23,25 @@ const reducer = (state, action) => {
 
 const AddCategory = () => {
   const [formState, dispatch] = useReducer(reducer, initialState);
-  const { sendRequest, isLoading } = useHttp()
-  const history = useHistory()
+  const { sendRequest, isLoading } = useHttp();
+  const history = useHistory();
+  const auth = useContext(AuthContext);
 
   const createCategory = async () => {
-      const url = 'http://localhost:5000/api/categories/new'
-      const categoryData = {
-          name: formState.name,
-          description: formState.description
-      }
-      try {
-          await sendRequest(url, 'POST', JSON.stringify(categoryData), { 'Content-Type':'application/json' })
-          history.push('/categories')
-      } catch (error) {
-          
-      }
-  }
+    const url = 'http://localhost:5000/api/categories/new';
+    const categoryData = {
+      name: formState.name,
+      description: formState.description,
+      user: auth.userId
+    };
+    try {
+      await sendRequest(url, 'POST', JSON.stringify(categoryData), {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${auth.token}`,
+      });
+      history.push('/categories');
+    } catch (error) {}
+  };
 
   return (
     <Container className="centered">
@@ -68,9 +72,18 @@ const AddCategory = () => {
         <br />
         <Grid container spacing={4}>
           <Grid item xs={12} sm={6}>
-            { isLoading? <CircularProgress /> :<Button variant="contained" color="primary" fullWidth onClick={createCategory}>
-              SUBMIT
-            </Button>}
+            {isLoading ? (
+              <CircularProgress />
+            ) : (
+              <Button
+                variant="contained"
+                color="primary"
+                fullWidth
+                onClick={createCategory}
+              >
+                SUBMIT
+              </Button>
+            )}
           </Grid>
           <Grid item xs={12} sm={6}>
             <Button

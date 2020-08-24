@@ -1,6 +1,7 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useContext } from 'react';
 import MUIDataTable from 'mui-datatables';
 import { useHttp } from '../../shared/http-hook';
+import { AuthContext } from '../../shared/auth-context'
 
 const Categories = () => {
   const columns = ['name', 'description', 'total'];
@@ -10,14 +11,15 @@ const Categories = () => {
 
   const [categories, setCategories] = useState([]);
   const { sendRequest } = useHttp();
+  const auth = useContext(AuthContext)
   const fetchCategories = useCallback(async () => {
     try {
       const resData = await sendRequest(
-        'http://localhost:5000/api/categories/all'
+        `http://localhost:5000/api/categories/user/${auth.userId}`
       );
       setCategories(resData.categories);
     } catch (error) {}
-  }, [sendRequest]);
+  }, [sendRequest, auth.userId]);
 
   useEffect(() => {
     fetchCategories();

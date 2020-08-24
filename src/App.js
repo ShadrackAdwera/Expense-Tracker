@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Route, Switch, Redirect } from 'react-router-dom';
 import LoginPage from './components/auth/login/login';
 import SignUpPage from './components/auth/signup/signup';
@@ -18,11 +18,9 @@ function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   let routes;
 
-  const loginHandler = () => {
+  const loginHandler = useCallback(() => {
     setIsLoggedIn(true);
-    setUserToken(JSON.parse(localStorage.getItem('token')));
-    setUserId(JSON.parse(localStorage.getItem('userId')))
-  };
+  },[]);
 
   const logoutHandler = () => {
     setIsLoggedIn(false);
@@ -31,11 +29,16 @@ function App() {
   };
 
   useEffect(() => {
-    setUserToken(JSON.parse(localStorage.getItem('token')));
-    setUserId(JSON.parse(localStorage.getItem('userId')))
-  }, [userToken, userId]);
+    // setUserToken(JSON.parse(localStorage.getItem('token')));
+    // setUserId(JSON.parse(localStorage.getItem('userId')))
+    const token = JSON.parse(localStorage.getItem('token'))
+    const userId = JSON.parse(localStorage.getItem('userId'))
+    if(userId && token) {
+      loginHandler()
+    }
+  }, [loginHandler]);
 
-  if (isLoggedIn && userToken) {
+  if (isLoggedIn) {
     routes = (
       <Switch>
         <Route exact path="/" component={Welcome} />
