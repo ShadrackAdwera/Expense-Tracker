@@ -3,8 +3,11 @@ const { check } = require('express-validator');
 
 const expensesController = require('../controllers/expenses-controllers');
 const imageUpload = require('../middlewares/image-upload')
+const checkAuth = require('../middlewares/auth-middleware')
 
 const router = express.Router();
+
+router.use(checkAuth)
 
 router.get('/all', expensesController.getAllExpenses);
 router.get('/:id', expensesController.getExpenseById);
