@@ -10,11 +10,13 @@ router.get('/all', categoriesController.getAllCategories);
 
 router.get('/:id', categoriesController.getCategoryById);
 
+router.get('/user/:userId', categoriesController.getCategoriesByUser);
+
 router.use(checkAuth) 
 
 router.post(
   '/new',
-  [check('name').not().isEmpty(), check('description').isLength({ min: 6 })],
+  [check('name').not().isEmpty(), check('description').isLength({ min: 6 }), check('user').not().isEmpty()],
   categoriesController.createCategory
 );
 

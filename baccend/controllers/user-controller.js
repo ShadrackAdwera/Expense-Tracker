@@ -52,7 +52,8 @@ const signUp = async (req, res, next) => {
     name,
     email,
     password: encryptedPassword,
-    expenses: []
+    expenses: [],
+    categories: []
   };
 
   const signedUpUser = new User(createUser);
@@ -73,7 +74,7 @@ const signUp = async (req, res, next) => {
   }
   res.status(201).json({
     message: 'Sign Up Successful',
-    user: { id: signedUpUser.id, name, email, token, expenses:[] },
+    user: { id: signedUpUser.id, name, email, token, expenses:[], categories:[] },
   });
 };
 
@@ -117,7 +118,7 @@ const login = async (req, res, next) => {
     .status(200)
     .json({
       message: 'Logged In',
-      user: { id: foundEmail.id, name: foundEmail.name, email, token, expenses: foundEmail.expenses },
+      user: { id: foundEmail.id, name: foundEmail.name, email, token, expenses: foundEmail.expenses, categories: foundEmail.categories },
     });
 };
 
