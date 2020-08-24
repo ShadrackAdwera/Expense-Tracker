@@ -39,9 +39,11 @@ const Login = () => {
         { 'Content-Type': 'application/json' }
       );
       if (resData.user) {
+        const tokenExpiration = new Date(new Date() + 1000 *60*60)
         localStorage.setItem('userName', JSON.stringify(resData.user.name));
         localStorage.setItem('token', JSON.stringify(resData.user.token));
         localStorage.setItem('userId', JSON.stringify(resData.user.id));
+        localStorage.setItem('expiration', JSON.stringify( tokenExpiration.toISOString() ));
         history.push('/');
         auth.login();
       }

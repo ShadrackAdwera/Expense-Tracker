@@ -15,24 +15,28 @@ import './App.css';
 function App() {
   const [userToken, setUserToken] = useState();
   const [userId, setUserId] = useState()
+  const [timeOut, setTimeOut] = useState()
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   let routes;
 
   const loginHandler = useCallback(() => {
     setIsLoggedIn(true);
+
   },[]);
 
-  const logoutHandler = () => {
+  const logoutHandler = useCallback(() => {
     setIsLoggedIn(false);
     setUserToken(localStorage.removeItem('token'));
     setUserId(localStorage.removeItem('userId'))
-  };
+    setTimeOut(localStorage.removeItem('expiration'))
+  },[]);
 
   useEffect(() => {
     // setUserToken(JSON.parse(localStorage.getItem('token')));
     // setUserId(JSON.parse(localStorage.getItem('userId')))
     const token = JSON.parse(localStorage.getItem('token'))
     const userId = JSON.parse(localStorage.getItem('userId'))
+    //const expiration = JSON.parse(localStorage.getItem('expiration'))
     if(userId && token) {
       loginHandler()
     }
@@ -62,6 +66,7 @@ function App() {
         isLoggedIn: isLoggedIn,
         userId: userId,
         token: userToken,
+        expiration: timeOut,
         login: loginHandler,
         logout: logoutHandler,
       }}
